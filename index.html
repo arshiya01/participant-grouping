@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participant Grouping Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="number"] {
+            max-width: 150px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin-left: 10px;
+        }
+
+        .participant-entry {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .participant-entry h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .availability-section {
+            margin-top: 15px;
+        }
+
+        .time-slot {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #cbd5e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .time-slot:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .time-slot.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .group-card {
+            background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .group-title {
+            font-size: 1.3em;
+            color: #4a5568;
+            font-weight: 700;
+        }
+
+        .condition-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .condition-a {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .condition-b {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .condition-c {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .member-list {
+            margin: 15px 0;
+        }
+
+        .member {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95em;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .member-ethnicity {
+            color: #718096;
+            font-size: 0.85em;
+            margin-left: 8px;
+        }
+
+        .common-times {
+            background: #edf2f7;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .common-times-label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .no-groups {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-size: 1.1em;
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 2px dashed #cbd5e0;
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Participant Grouping Tool</h1>
+            <p class="subtitle">Create groups of 4 participants based on availability and ethnicity</p>
+
+            <div id="step1" class="step">
+                <div class="input-group">
+                    <label for="numParticipants">Number of Participants:</label>
+                    <input type="number" id="numParticipants" min="4" placeholder="Enter number (min: 4)">
+                </div>
+                <button class="btn" onclick="startDataEntry()">Start Data Entry</button>
+            </div>
+
+            <div id="step2" class="step" style="display: none;">
+                <h2 style="color: #4a5568; margin-bottom: 20px;">Enter Participant Information</h2>
+                <div id="participantForms"></div>
+                <button class="btn" onclick="processGroups()">Find Groups</button>
+                <button class="btn btn-secondary" onclick="resetAll()">Reset</button>
+            </div>
+
+            <div id="results" class="results" style="display: none;">
+                <h2 style="color: #4a5568; margin-bottom: 20px;">Group Results</h2>
+                <div id="stats" class="stats"></div>
+                <div id="groupsList"></div>
+                <button class="btn btn-secondary" onclick="resetAll()">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const timeSlots = [
+            'Monday 12:30-2:00 PM',
+            'Monday 3:30-5:00 PM',
+            'Tuesday 10:00-11:30 AM',
+            'Tuesday 12:00-1:30 PM',
+            'Tuesday 2:00-3:30 PM',
+            'Wednesday 9:30-11:00 AM',
+            'Wednesday 11:30-1:00 PM',
+            'Wednesday 1:30-3:00 PM',
+            'Wednesday 3:30-5:00 PM',
+            'Thursday 11:30-1:00 PM',
+            'Thursday 2:30-4:00 PM',
+            'Friday 9:30-11:00 AM',
+            'Friday 11:30-1:00 PM',
+            'Friday 3:30-5:00 PM'
+        ];
+
+        let participants = [];
+
+        function startDataEntry() {
+            const num = parseInt(document.getElementById('numParticipants').value);
+            if (isNaN(num) || num < 4) {
+                alert('Please enter a valid number of participants (minimum 4)');
+                return;
+            }
+
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+
+            const formsContainer = document.getElementById('participantForms');
+            formsContainer.innerHTML = '';
+
+            for (let i = 0; i < num; i++) {
+                const participantDiv = document.createElement('div');
+                participantDiv.className = 'participant-entry';
+                participantDiv.innerHTML = `
+                    <h3>Participant ${i + 1}</h3>
+                    <div class="input-group">
+                        <label>Name:</label>
+                        <input type="text" id="name_${i}" placeholder="Enter name">
+                    </div>
+                    <div class="input-group">
+                        <label>Ethnicity:</label>
+                        <select id="ethnicity_${i}">
+                            <option value="">Select ethnicity</option>
+                            <option value="Hispanic">Hispanic</option>
+                            <option value="Asian">Asian</option>
+                            <option value="White">White</option>
+                            <option value="Black">Black</option>
+                        </select>
+                    </div>
+                    <div class="availability-section">
+                        <label>Available Times (click to select):</label>
+                        <div id="times_${i}">
+                            ${timeSlots.map(slot => 
+                                `<span class="time-slot" data-slot="${slot}" onclick="toggleTimeSlot(this, ${i})">${slot}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                formsContainer.appendChild(participantDiv);
+            }
+        }
+
+        function toggleTimeSlot(element, participantIndex) {
+            element.classList.toggle('selected');
+        }
+
+        function processGroups() {
+            const num = parseInt(document.getElementById('numParticipants').value);
+            participants = [];
+
+            for (let i = 0; i < num; i++) {
+                const name = document.getElementById(`name_${i}`).value.trim();
+                const ethnicity = document.getElementById(`ethnicity_${i}`).value;
+                const selectedTimes = Array.from(document.querySelectorAll(`#times_${i} .time-slot.selected`))
+                    .map(el => el.dataset.slot);
+
+                if (!name || !ethnicity || selectedTimes.length === 0) {
+                    alert(`Please complete all information for Participant ${i + 1}`);
+                    return;
+                }
+
+                participants.push({ name, ethnicity, availability: selectedTimes });
+            }
+
+            const groups = findValidGroups();
+            displayResults(groups);
+        }
+
+        function findValidGroups() {
+            const groups = [];
+            const usedParticipants = new Set();
+
+            function checkCondition(group) {
+                const ethnicities = group.map(p => p.ethnicity);
+                const counts = ethnicities.reduce((acc, e) => {
+                    acc[e] = (acc[e] || 0) + 1;
+                    return acc;
+                }, {});
+
+                // Condition A: 1 Hispanic + 1 Asian + 1 White + 1 Black
+                if (counts.Hispanic === 1 && counts.Asian === 1 && counts.White === 1 && counts.Black === 1) {
+                    return 'A';
+                }
+                // Condition B: 3 Hispanic + 1 Asian
+                if (counts.Hispanic === 3 && counts.Asian === 1) {
+                    return 'B';
+                }
+                // Condition C: 4 Asian
+                if (counts.Asian === 4) {
+                    return 'C';
+                }
+                return null;
+            }
+
+            function findCommonTimes(group) {
+                if (group.length === 0) return [];
+                let common = [...group[0].availability];
+                for (let i = 1; i < group.length; i++) {
+                    common = common.filter(time => group[i].availability.includes(time));
+                }
+                return common;
+            }
+
+            // Generate all possible combinations of 4 participants
+            function* combinations(arr, n) {
+                if (n === 1) {
+                    for (let i = 0; i < arr.length; i++) {
+                        yield [arr[i]];
+                    }
+                } else {
+                    for (let i = 0; i <= arr.length - n; i++) {
+                        for (let combo of combinations(arr.slice(i + 1), n - 1)) {
+                            yield [arr[i], ...combo];
+                        }
+                    }
+                }
+            }
+
+            // Find all valid groups
+            const availableParticipants = participants.filter(p => !usedParticipants.has(p.name));
+            
+            for (let combo of combinations(availableParticipants, 4)) {
+                const commonTimes = findCommonTimes(combo);
+                if (commonTimes.length > 0) {
+                    const condition = checkCondition(combo);
+                    if (condition) {
+                        groups.push({
+                            members: combo,
+                            condition: condition,
+                            commonTimes: commonTimes
+                        });
+                    }
+                }
+            }
+
+            return groups;
+        }
+
+        function displayResults(groups) {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+            // Display stats
+            const statsDiv = document.getElementById('stats');
+            const conditionCounts = groups.reduce((acc, g) => {
+                acc[g.condition] = (acc[g.condition] || 0) + 1;
+                return acc;
+            }, {});
+
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${groups.length}</div>
+                    <div class="stat-label">Total Groups</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${conditionCounts.A || 0}</div>
+                    <div class="stat-label">Condition A</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${conditionCounts.B || 0}</div>
+                    <div class="stat-label">Condition B</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${conditionCounts.C || 0}</div>
+                    <div class="stat-label">Condition C</div>
+                </div>
+            `;
+
+            const groupsList = document.getElementById('groupsList');
+            
+            if (groups.length === 0) {
+                groupsList.innerHTML = '<div class="no-groups">No valid groups found.</div>';
+                return;
+            }
+
+            groupsList.innerHTML = groups.map((group, index) => `
+                <div class="group-card">
+                    <div class="group-header">
+                        <div class="group-title">Group ${index + 1}</div>
+                        <div class="condition-badge condition-${group.condition.toLowerCase()}">
+                            Condition ${group.condition}
+                        </div>
+                    </div>
+                    <div class="member-list">
+                        ${group.members.map(m => `
+                            <div class="member">
+                                <span class="member-name">${m.name}</span>
+                                <span class="member-ethnicity">(${m.ethnicity})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="common-times">
+                        <div class="common-times-label">Common Available Times:</div>
+                        ${group.commonTimes.join(', ')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetAll() {
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('numParticipants').value = '';
+            participants = [];
+        }
+    </script>
+</body>
+</html>
