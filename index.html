@@ -458,18 +458,23 @@
                     return acc;
                 }, {});
 
-                // Condition A: 1 Hispanic + 1 Asian + 1 White + 1 Black
+                const countValues = Object.values(counts);
+                
+                // Condition A: 1 Hispanic + 1 Asian + 1 White + 1 Black (all different)
                 if (counts.Hispanic === 1 && counts.Asian === 1 && counts.White === 1 && counts.Black === 1) {
                     return 'A';
                 }
-                // Condition B: 3 Hispanic + 1 Asian
-                if (counts.Hispanic === 3 && counts.Asian === 1) {
-                    return 'B';
-                }
-                // Condition C: 4 Asian
-                if (counts.Asian === 4) {
+                
+                // Condition C: 4 of the same ethnicity
+                if (countValues.includes(4)) {
                     return 'C';
                 }
+                
+                // Condition B: 3 of the same ethnicity + 1 different
+                if (countValues.includes(3) && countValues.length === 2) {
+                    return 'B';
+                }
+                
                 return null;
             }
 
